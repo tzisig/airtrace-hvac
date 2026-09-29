@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import AreaMap from '../../components/AreaMap.astro';
+import CtaPanel from '../../components/CtaPanel.astro';
+import Icon from '../../components/Icon.astro';
+import { areas, site, contact, images } from '../../config/site.config';
+import { breadcrumbSchema, home } from '../../lib/schema';
+
+const crumbs = [home, { label: 'אזורי שירות' }];
+---
+<BaseLayout
+  title={`אזורי שירות: טכנאי מזגנים ${site.regionIn}`}
+  description={`${site.name} נותן שירות ב${areas.map((a) => a.name).join(', ')}. זמני הגעה לכל עיר, והבעיות שאנחנו פוגשים בכל אחת מהן.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHero
+    title={`אזורי השירות ${site.regionIn}`}
+    lead={`הרכב יוצא כל בוקר מ${contact.baseArea}. בכל עיר יש בניינים אחרים, אוויר אחר ובעיות אחרות, ולכן לכל עיר יש עמוד משלה.`}
+    crumbs={crumbs}
+    image={images.areas}
+    imageAlt={images.areasAlt}
+  />
+  <section class="section">
+    <div class="container grid">
+      <ul class="cities">
+        {areas.map((a) => (
+          <li>
+            <a href={`/areas/${a.slug}/`}>
+              <Image src={a.image} alt="" widths={[320, 600]} sizes="(min-width: 900px) 220px, 40vw" loading="lazy" />
+              <span class="txt">
+                <strong>{a.name}</strong>
+                <span>{a.summary}</span>
+                <span class="eta"><Icon name="clock" size={15} /> הגעה בדרך כלל תוך {a.arrival}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="map-col">
+        <AreaMap />
+        <p class="muted">המפה סכמטית. זמני ההגעה הם בשעות היום, בלי פקקים חריגים.</p>
+      </div>
+    </div>
+  </section>
+  <CtaPanel title="גרים קרוב, אבל לא ברשימה?" text="אנחנו מגיעים גם ליישובים הסמוכים לערים האלה. שלחו הודעה ונבדוק." />
+</BaseLayout>
+
+<style>
+  .grid { display: grid; gap: var(--space-7); }
+  @media (min-width: 960px) { .grid { grid-template-columns: 1.2fr 0.8fr; align-items: start; } .map-col { position: sticky; top: calc(var(--header-h) + 1rem); } }
+  .cities { list-style: none; padding: 0; margin: 0; border-top: 2px solid var(--c-ink); }
+  .cities li { border-bottom: 1px solid var(--c-line); }
+  .cities a { display: grid; grid-template-columns: minmax(110px, 200px) 1fr; gap: var(--space-4); align-items: center; padding: var(--space-4) 0; color: inherit; text-decoration: none; }
+  .cities :global(img) { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r-control); }
+  .txt { display: grid; gap: 0.3rem; }
+  .txt strong { font: 700 clamp(2.2rem, 1.8rem + 1.5vw, 3rem)/0.95 var(--font-display); }
+  .cities a:hover strong { color: var(--c-lime-deep); }
+  .txt span { color: var(--c-slate); }
+  .eta { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600; font-size: 0.9rem; color: var(--c-ink) !important; }
+  .map-col p { margin-top: var(--space-3); font-size: 0.9rem; }
+</style>

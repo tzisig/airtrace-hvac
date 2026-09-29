@@ -1,0 +1,229 @@
+---
+// Horsepower calculator shown as a thermostat-style gauge. All factors come from `calculator` in the config.
+// compact: the hero version (area, sun, top floor). Full: adds people, room type and ceiling height.
+import Icon from './Icon.astro';
+import { calculator, waLink } from '../config/site.config';
+
+interface Props { compact?: boolean; id?: string }
+const { compact = false, id = 'dial' } = Astro.props;
+
+const R = 80;
+const pos = (ratio: number, r = R) => {
+  const a = Math.PI - ratio * Math.PI;
+  return { x: 100 + r * Math.cos(a), y: 100 - r * Math.sin(a) };
+};
+const scaleMax = 30000;
+const ticks = calculator.sizes.map((s) => ({ ...s, ratio: s.btu / scaleMax }));
+const cfg = JSON.stringify({ ...calculator, scaleMax });
+
+// Server-rendered starting state (20 m², average sun), so nothing shifts when the script takes over.
+const startArea = 20;
+const startBtu = Math.round((startArea * calculator.btuPerM2) / 100) * 100;
+const startSize = calculator.sizes.find((s) => s.btu >= startBtu * 0.95)!;
+const startKnob = pos(startBtu / scaleMax);
+const startVerdict = `לחדר של ${startArea} מ"ר מתאים מזגן של ${startSize.hp} כ"ס. מזגן גדול יותר לא יקרר טוב יותר, רק יצרוך יותר חשמל.`;
+---
+<div class:list={['dial', { compact }]} data-dial data-config={cfg} data-wa={waLink('')}>
+  <div class="gauge-wrap">
+    <svg class="gauge" viewBox="0 0 200 118" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id={`${id}-thermal`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stop-color="var(--c-cool)" />
+          <stop offset="0.55" stop-color="var(--c-lime)" />
+          <stop offset="1" stop-color="var(--c-warm)" />
+        </linearGradient>
+      </defs>
+      <path class="track" d="M20 100 A80 80 0 0 1 180 100" pathLength="100" />
+      <path class="fill" d="M20 100 A80 80 0 0 1 180 100" pathLength="100" stroke={`url(#${id}-thermal)`} style={`--v:${(startBtu / scaleMax) * 100}`} data-dial-fill />
+      {ticks.map((t) => {
+        const b = pos(t.ratio, 70);
+        const l = pos(t.ratio, 104);
+        return (
+          <g class:list={["tick", { on: t.hp === startSize.hp }]} data-tick={t.hp}>
+            <line x1={b.x} y1={b.y} x2={pos(t.ratio, 74).x} y2={pos(t.ratio, 74).y} />
+            <text x={l.x} y={l.y + 3} text-anchor="middle">{t.hp}</text>
+          </g>
+        );
+      })}
+      <circle class="knob" r="7" cx={startKnob.x} cy={startKnob.y} data-dial-knob />
+    </svg>
+    <output class="readout" for={`${id}-area`} aria-live="polite">
+      <span class="hp"><span data-dial-hp>{startSize.hp}</span><span class="unit">כ"ס</span></span>
+      <span class="btu" data-dial-btu>≈ {startBtu.toLocaleString("he-IL")} BTU</span>
+    </output>
+  </div>
+
+  <div class="controls">
+    <div class="ctl">
+      <label for={`${id}-area`}>שטח החדר <span class="val"><span data-dial-area-val>{startArea}</span> מ"ר</span></label>
+      <input id={`${id}-area`} type="range" min="6" max="60" step="1" value={startArea} data-dial-area />
+    </div>
+
+    <fieldset class="ctl seg">
+      <legend>כמה שמש נכנסת לחדר?</legend>
+      <div class="seg-row">
+        <label><input type="radio" name={`${id}-sun`} value="low" /><span>מעט</span></label>
+        <label><input type="radio" name={`${id}-sun`} value="mid" checked /><span>בינוני</span></label>
+        <label><input type="radio" name={`${id}-sun`} value="high" /><span>הרבה, מערב או דרום</span></label>
+      </div>
+    </fieldset>
+
+    <label class="check">
+      <input type="checkbox" data-dial-top /><span>קומה אחרונה או בית עם גג חשוף</span>
+    </label>
+
+    {!compact && (
+      <>
+        <div class="ctl two">
+          <div>
+            <label for={`${id}-people`}>כמה אנשים בחדר בדרך כלל?</label>
+            <select id={`${id}-people`} data-dial-people>
+              {[1, 2, 3, 4, 5, 6, 8, 10].map((n) => <option value={n} selected={n === 2}>{n}</option>)}
+            </select>
+          </div>
+          <div>
+            <label for={`${id}-ceiling`}>גובה תקרה</label>
+            <select id={`${id}-ceiling`} data-dial-ceiling>
+              <option value="2.5">עד 2.5 מ'</option>
+              <option value="2.6" selected>2.6 מ' (רגיל)</option>
+              <option value="2.8">2.8 מ'</option>
+              <option value="3.2">3 מ' ומעלה</option>
+            </select>
+          </div>
+        </div>
+        <label class="check">
+          <input type="checkbox" data-dial-kitchen /><span>החדר פתוח למטבח</span>
+        </label>
+      </>
+    )}
+
+    <p class="verdict" data-dial-verdict>{startVerdict}</p>
+    <div class="dial-cta">
+      <a class="btn btn--wa" href={waLink()} data-dial-wa><Icon name="whatsapp" size={19} /> לשלוח את התוצאה לעומרי</a>
+      {compact && <a class="more" href="/calculator/">חישוב מפורט</a>}
+    </div>
+    {!compact && <p class="disclaimer">{calculator.disclaimer}</p>}
+  </div>
+</div>
+
+<style>
+  .dial {
+    --dial-bg: var(--c-ink);
+    display: grid; gap: var(--space-5); padding: clamp(1.25rem, 3vw, 2rem);
+    background: var(--dial-bg); color: var(--c-on-dark); border-radius: 22px;
+    box-shadow: 0 30px 60px -30px rgb(27 35 38 / 0.55);
+  }
+  @media (min-width: 760px) {
+    .dial:not(.compact) { grid-template-columns: 1fr 1.1fr; align-items: center; gap: var(--space-7); }
+  }
+
+  .gauge-wrap { position: relative; direction: ltr; max-width: 420px; width: 100%; margin-inline: auto; }
+  .gauge { width: 100%; overflow: visible; }
+  .track, .fill { fill: none; stroke-width: 14; stroke-linecap: round; }
+  .track { stroke: rgb(255 255 255 / 0.1); }
+  .fill { stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--v, 50)); transition: stroke-dashoffset 420ms var(--ease); }
+  .tick line { stroke: rgb(255 255 255 / 0.3); stroke-width: 1.5; }
+  .tick text { fill: var(--c-on-dark-muted); font: 600 8px var(--font-body); }
+  .tick.on text { fill: #fff; font-weight: 700; }
+  .tick.on line { stroke: var(--c-lime); stroke-width: 2.5; }
+  .knob { fill: #fff; stroke: var(--dial-bg); stroke-width: 3; transition: cx 420ms var(--ease), cy 420ms var(--ease); }
+
+  .readout { position: absolute; inset-inline: 0; bottom: 0; display: grid; justify-items: center; direction: rtl; }
+  .hp { display: flex; align-items: baseline; gap: 0.35rem; font: 700 clamp(4.2rem, 3rem + 5vw, 6.2rem)/0.8 var(--font-display); color: #fff; }
+  .unit { font-size: 0.42em; color: var(--c-lime); }
+  .btu { font-size: 0.9rem; color: var(--c-on-dark-muted); direction: ltr; margin-top: 0.3rem; }
+
+  .controls { display: grid; gap: var(--space-4); }
+  .ctl label, .seg legend { color: var(--c-on-dark); }
+  .ctl > label { display: flex; justify-content: space-between; align-items: baseline; }
+  .val { font: 700 1.9rem/1 var(--font-display); color: var(--c-lime); }
+
+  input[type='range'] { -webkit-appearance: none; appearance: none; min-height: 36px; padding: 0; background: transparent; border: 0; }
+  input[type='range']::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: rgb(255 255 255 / 0.16); }
+  input[type='range']::-moz-range-track { height: 6px; border-radius: 3px; background: rgb(255 255 255 / 0.16); }
+  input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -11px; border-radius: 50%; background: var(--c-lime); border: 4px solid var(--dial-bg); box-shadow: 0 0 0 2px var(--c-lime); cursor: grab; }
+  input[type='range']::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--c-lime); border: 4px solid var(--dial-bg); box-shadow: 0 0 0 2px var(--c-lime); cursor: grab; }
+
+  .seg { border: 0; margin: 0; padding: 0; }
+  .seg legend { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.4rem; padding: 0; }
+  .seg-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .seg-row label { margin: 0; position: relative; }
+  .seg-row input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
+  .seg-row span {
+    display: inline-flex; align-items: center; min-height: 42px; padding: 0.35rem 0.9rem; border-radius: var(--r-control);
+    border: 1.5px solid rgb(255 255 255 / 0.22); font-weight: 600; font-size: 0.92rem; cursor: pointer;
+  }
+  .seg-row input:checked + span { background: var(--c-lime); border-color: var(--c-lime); color: var(--c-ink); }
+  .seg-row input:focus-visible + span { outline: 3px solid var(--c-cool); outline-offset: 2px; }
+
+  .check { display: flex; align-items: center; gap: 0.6rem; font-weight: 500; color: var(--c-on-dark); margin: 0; cursor: pointer; }
+  .check input { width: 22px; height: 22px; min-height: 0; accent-color: var(--c-lime); flex: none; }
+
+  .two { display: grid; gap: var(--space-3); grid-template-columns: 1fr 1fr; align-items: end; }
+  @media (max-width: 480px) { .two { grid-template-columns: 1fr; } }
+  .two select { background: #fff; }
+
+  .verdict { margin: 0; padding: 0.8rem 1rem; border-radius: var(--r-control); background: rgb(255 255 255 / 0.06); border-inline-start: 3px solid var(--c-lime); font-size: 0.97rem; }
+  .dial-cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+  .more { color: var(--c-lime); font-weight: 700; }
+  .disclaimer { margin: 0; font-size: 0.85rem; color: var(--c-on-dark-muted); }
+</style>
+
+<script>
+  type Cfg = {
+    btuPerM2: number; standardCeiling: number; sun: Record<string, number>; topFloor: number;
+    perExtraPerson: number; basePeople: number; kitchen: number; sizes: { hp: string; btu: number }[];
+    maxSingle: number; scaleMax: number;
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-dial]').forEach((el) => {
+    const cfg: Cfg = JSON.parse(el.dataset.config!);
+    const $ = <T extends Element>(s: string) => el.querySelector<T>(s);
+    const area = $<HTMLInputElement>('[data-dial-area]')!;
+    const top = $<HTMLInputElement>('[data-dial-top]')!;
+    const people = $<HTMLSelectElement>('[data-dial-people]');
+    const ceiling = $<HTMLSelectElement>('[data-dial-ceiling]');
+    const kitchen = $<HTMLInputElement>('[data-dial-kitchen]');
+    const fill = $<SVGPathElement>('[data-dial-fill]')!;
+    const knob = $<SVGCircleElement>('[data-dial-knob]')!;
+    const wa = $<HTMLAnchorElement>('[data-dial-wa]')!;
+    const fmt = (n: number) => n.toLocaleString('he-IL');
+
+    const update = () => {
+      const m2 = Number(area.value);
+      const sun = (el.querySelector<HTMLInputElement>('input[type="radio"]:checked')?.value) || 'mid';
+      const h = Number(ceiling?.value || cfg.standardCeiling);
+      const n = Number(people?.value || cfg.basePeople);
+      let btu = m2 * cfg.btuPerM2 * (h / cfg.standardCeiling) * cfg.sun[sun];
+      if (top.checked) btu *= cfg.topFloor;
+      btu += Math.max(0, n - cfg.basePeople) * cfg.perExtraPerson;
+      if (kitchen?.checked) btu += cfg.kitchen;
+      btu = Math.round(btu / 100) * 100;
+
+      const size = cfg.sizes.find((s) => s.btu >= btu * 0.95);
+      const over = btu > cfg.maxSingle;
+      const ratio = Math.min(btu / cfg.scaleMax, 1);
+
+      el.querySelector('[data-dial-area-val]')!.textContent = String(m2);
+      el.querySelector('[data-dial-hp]')!.textContent = over ? '3+' : size!.hp;
+      el.querySelector('[data-dial-btu]')!.textContent = `≈ ${fmt(btu)} BTU`;
+      fill.style.setProperty('--v', String(ratio * 100));
+      const a = Math.PI - ratio * Math.PI;
+      knob.setAttribute('cx', String(100 + 80 * Math.cos(a)));
+      knob.setAttribute('cy', String(100 - 80 * Math.sin(a)));
+      el.querySelectorAll<SVGGElement>('[data-tick]').forEach((t) => t.classList.toggle('on', !over && t.dataset.tick === size?.hp));
+
+      const verdict = over
+        ? `החדר צריך בערך ${fmt(btu)} BTU, יותר ממזגן עילי אחד. כדאי לשקול מיני מרכזי או שני מזגנים.`
+        : `לחדר של ${m2} מ"ר מתאים מזגן של ${size!.hp} כ"ס. מזגן גדול יותר לא יקרר טוב יותר, רק יצרוך יותר חשמל.`;
+      el.querySelector('[data-dial-verdict]')!.textContent = verdict;
+
+      const msg = `שלום עומרי, חישבתי באתר: חדר של ${m2} מ"ר, שמש ${sun === 'high' ? 'חזקה' : sun === 'low' ? 'מעטה' : 'בינונית'}${top.checked ? ', קומה אחרונה' : ''}. יצא ${over ? 'מעל 3' : size!.hp} כ"ס (${fmt(btu)} BTU). אשמח להצעת מחיר.`;
+      wa.href = el.dataset.wa + encodeURIComponent(msg);
+    };
+
+    el.addEventListener('input', update);
+    el.addEventListener('change', update);
+    update();
+  });
+</script>

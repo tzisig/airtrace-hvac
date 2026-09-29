@@ -1,0 +1,96 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { nav, contact, telLink, waLink } from '../config/site.config';
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+<header class="site-header" data-header>
+  <div class="container bar">
+    <Logo />
+    <nav class="main-nav" aria-label="ניווט ראשי">
+      <ul>
+        {nav.map((n) => (
+          <li><a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <div class="actions">
+      <p
+        class="status"
+        data-status-chip
+        data-weekly={JSON.stringify(contact.weekly)}
+        data-season={JSON.stringify(contact.hotSeason)}
+        hidden
+      >
+        <span class="dot" aria-hidden="true"></span><span data-status-text></span>
+      </p>
+      <a class="btn btn--ink call" href={telLink}>
+        <Icon name="phone" size={18} /><span class="ltr">{contact.phone}</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-toggle>
+        <Icon name="menu" size={24} /><span class="visually-hidden">תפריט</span>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobile-nav" data-mobile-nav hidden>
+    <ul class="container">
+      <li><a href="/">דף הבית</a></li>
+      {nav.map((n) => <li><a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a></li>)}
+      <li><a href="/reviews/">המלצות</a></li>
+      <li><a href="/faq/">שאלות נפוצות</a></li>
+      <li><a href="/contact/">צור קשר</a></li>
+      <li class="m-cta"><a class="btn btn--wa btn--block" href={waLink()}><Icon name="whatsapp" size={20} /> וואטסאפ</a></li>
+    </ul>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky; top: 0; z-index: 90; background: rgb(237 241 242 / 0.94);
+    backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid transparent;
+    transition: border-color 200ms;
+  }
+  .site-header:global(.is-scrolled) { border-bottom-color: var(--c-line); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: var(--header-h); }
+  .main-nav ul { display: flex; gap: 0.2rem; list-style: none; margin: 0; padding: 0; }
+  .main-nav a {
+    display: block; padding: 0.5rem 0.7rem; border-radius: var(--r-control);
+    color: var(--c-ink); text-decoration: none; font-weight: 600; font-size: 0.97rem; white-space: nowrap;
+  }
+  .main-nav a:hover { background: rgb(27 35 38 / 0.06); }
+  .main-nav a[aria-current='page'] { box-shadow: inset 0 -3px 0 var(--c-lime); border-radius: 0; }
+  .actions { display: flex; align-items: center; gap: var(--space-3); }
+  .status {
+    display: flex; align-items: center; gap: 0.45rem; margin: 0; font-size: 0.85rem; font-weight: 600;
+    color: var(--c-slate); white-space: nowrap;
+  }
+  .status[hidden] { display: none; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c-slate); }
+  .status[data-open='true'] .dot { background: var(--c-lime); box-shadow: 0 0 0 4px var(--c-lime-soft); }
+  .call { min-height: 44px; padding-inline: 1rem; }
+  .menu-toggle {
+    display: none; width: 48px; height: 48px; place-items: center; border: 0; border-radius: var(--r-control);
+    background: transparent; color: var(--c-ink); cursor: pointer;
+  }
+  .mobile-nav { border-top: 1px solid var(--c-line); background: var(--c-frost); max-height: calc(100dvh - var(--header-h)); overflow-y: auto; }
+  .mobile-nav ul { list-style: none; padding-block: var(--space-3) var(--space-6); margin-block: 0; display: grid; }
+  .mobile-nav li a:not(.btn) {
+    display: block; padding: 0.85rem 0; font: 700 2rem/1 var(--font-display); color: var(--c-ink);
+    text-decoration: none; border-bottom: 1px solid var(--c-line);
+  }
+  .mobile-nav a[aria-current='page'] { color: var(--c-lime-deep); }
+  .m-cta { margin-top: var(--space-5); }
+
+  @media (max-width: 1180px) {
+    .status { display: none !important; }
+  }
+  @media (max-width: 1040px) {
+    .main-nav { display: none; }
+    .menu-toggle { display: grid; }
+  }
+  @media (max-width: 560px) {
+    .call span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .call { width: 48px; padding: 0; }
+  }
+</style>

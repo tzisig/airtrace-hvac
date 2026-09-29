@@ -1,0 +1,22 @@
+---
+// Numbered only because the content is a real sequence.
+interface Props { steps: { title: string; text: string }[] }
+const { steps } = Astro.props;
+---
+<ol class="steps">
+  {steps.map((s) => (<li><h3>{s.title}</h3><p>{s.text}</p></li>))}
+</ol>
+
+<style>
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: grid; gap: var(--space-5); }
+  @media (min-width: 800px) { .steps { grid-template-columns: repeat(4, 1fr); gap: var(--space-4); } }
+  li { counter-increment: step; position: relative; padding-top: 3.4rem; }
+  li::before {
+    content: counter(step); position: absolute; top: 0; inset-inline-start: 0;
+    font: 700 3rem/1 var(--font-display); color: var(--c-lime-deep);
+  }
+  li::after { content: ''; position: absolute; top: 1.3rem; inset-inline: 2.2rem 0; height: 2px; background: var(--c-line); }
+  li:last-child::after { display: none; }
+  h3 { margin-bottom: 0.3rem; }
+  p { margin: 0; color: var(--c-slate); font-size: 0.97rem; }
+</style>

@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import type { Crumb } from '../lib/schema';
+
+interface Props {
+  title: string;
+  lead?: string;
+  crumbs: Crumb[];
+  image?: ImageMetadata;
+  imageAlt?: string;
+  /** Short spec-style facts under the lead, e.g. price from, duration. */
+  facts?: { label: string; value: string }[];
+}
+const { title, lead, crumbs, image, imageAlt = '', facts = [] } = Astro.props;
+---
+<section class:list={['page-hero', { 'has-image': !!image }]}>
+  <div class="container inner">
+    <div class="text">
+      <Breadcrumbs crumbs={crumbs} />
+      <h1>{title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+      {facts.length > 0 && (
+        <dl class="facts">
+          {facts.map((f) => (<div><dt>{f.label}</dt><dd>{f.value}</dd></div>))}
+        </dl>
+      )}
+      <slot />
+    </div>
+    {image && (
+      <div class="media">
+        <Image src={image} alt={imageAlt} widths={[480, 760, 1100]} sizes="(min-width: 960px) 520px, 100vw" loading="eager" fetchpriority="high" />
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .page-hero { padding-block: var(--space-6) var(--space-7); border-bottom: 1px solid var(--c-line); }
+  .inner { display: grid; gap: var(--space-6); align-items: center; }
+  @media (min-width: 960px) {
+    .has-image .inner { grid-template-columns: 1.15fr 0.85fr; }
+  }
+  h1 { margin-bottom: var(--space-4); }
+  .lead { max-width: 40rem; margin-bottom: var(--space-5); }
+  .facts { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 var(--space-5); border: 1.5px solid var(--c-ink); border-radius: var(--r-control); width: fit-content; max-width: 100%; }
+  .facts div { padding: 0.55rem 1rem; }
+  .facts div + div { border-inline-start: 1.5px solid var(--c-ink); }
+  .facts dt { font-size: 0.8rem; color: var(--c-slate); }
+  .facts dd { margin: 0; font-weight: 700; }
+  .media :global(img) { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r-panel); }
+  @media (max-width: 560px) {
+    .facts { width: 100%; }
+    .facts div { flex: 1 1 50%; }
+    .facts div + div { border-inline-start: 0; }
+    .facts div:nth-child(n + 2) { border-top: 1.5px solid var(--c-ink); }
+  }
+</style>

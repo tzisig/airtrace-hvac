@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ReviewCard from '../components/ReviewCard.astro';
+import CtaPanel from '../components/CtaPanel.astro';
+import { reviews, stats, site } from '../config/site.config';
+import { breadcrumbSchema, businessRef, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'המלצות' }];
+const reviewSchema = reviews.map((r) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Review',
+  itemReviewed: businessRef,
+  author: { '@type': 'Person', name: r.name },
+  reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 },
+  reviewBody: r.text,
+  datePublished: r.date,
+}));
+const dist = [5, 4, 3, 2, 1].map((n) => ({ n, count: reviews.filter((r) => r.rating === n).length }));
+---
+<BaseLayout
+  title="המלצות לקוחות"
+  description={`${stats.reviewCount} ביקורות, דירוג ממוצע ${stats.rating}. מה לקוחות ${site.regionIn} כותבים על ההתקנות, התיקונים והניקוי של ${site.name}.`}
+  schema={[breadcrumbSchema(crumbs), ...reviewSchema]}
+>
+  <PageHero title="מה לקוחות אומרים" lead="ציטוטים מלאים, עם עיר ושירות. בלי לערוך ובלי לבחור רק את הטובים." crumbs={crumbs} />
+  <section class="section">
+    <div class="container grid">
+      <aside class="summary">
+        <p class="big">{stats.rating}</p>
+        <p class="muted">ממוצע מתוך 5, {stats.reviewCount} ביקורות</p>
+        <p class="sub">בעמוד הזה {reviews.length} ביקורות אחרונות:</p>
+        <ul class="bars">
+          {dist.map((d) => (
+            <li>
+              <span>{d.n} כוכבים</span>
+              <span class="bar" aria-hidden="true"><span style={`width:${(d.count / reviews.length) * 100}%`}></span></span>
+              <span>{d.count}</span>
+            </li>
+          ))}
+        </ul>
+      </aside>
+      <div>{reviews.map((r) => <ReviewCard review={r} />)}</div>
+    </div>
+  </section>
+  <CtaPanel title="הייתם לקוחות שלנו?" text="נשמח לשמוע איך היה. ואם משהו לא עבד כמו שצריך, קודם כול ספרו לנו ונתקן." message="שלום עומרי, רציתי לשתף איך היה" />
+</BaseLayout>
+
+<style>
+  .grid { display: grid; gap: var(--space-7); }
+  @media (min-width: 960px) { .grid { grid-template-columns: 0.55fr 1.45fr; gap: var(--space-8); } .summary { position: sticky; top: calc(var(--header-h) + 1rem); align-self: start; } }
+  .big { font: 700 clamp(7rem, 5rem + 6vw, 10rem)/0.8 var(--font-display); margin: 0 0 var(--space-3); }
+  .sub { font-weight: 600; margin-top: var(--space-5); }
+  .bars { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; font-size: 0.9rem; }
+  .bars li { display: grid; grid-template-columns: 5rem 1fr 1.5rem; gap: 0.6rem; align-items: center; }
+  .bar { height: 8px; background: var(--c-line); border-radius: 4px; overflow: hidden; }
+  .bar span { display: block; height: 100%; background: var(--c-lime-deep); }
+</style>

@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { services } from '../config/site.config';
+---
+<BaseLayout title="העמוד לא נמצא" description="העמוד שחיפשתם לא נמצא. הנה העמודים שהכי מחפשים באתר." noindex>
+  <section class="nf">
+    <div class="container">
+      <p class="code" aria-hidden="true">404</p>
+      <h1>העמוד הזה לא נמצא</h1>
+      <p class="lead">אולי הכתובת השתנתה. אחד מאלה יעזור?</p>
+      <ul>
+        <li><a href="/">דף הבית</a></li>
+        <li><a href="/troubleshooting/">המזגן לא עובד?</a></li>
+        <li><a href="/calculator/">מחשבון כ"ס</a></li>
+        {services.slice(0, 4).map((s) => <li><a href={`/services/${s.slug}/`}>{s.title}</a></li>)}
+        <li><a href="/contact/">צור קשר</a></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf { padding-block: var(--space-8) var(--space-9); }
+  .code { font: 700 clamp(8rem, 20vw, 14rem)/0.8 var(--font-display); color: var(--c-lime); margin: 0 0 var(--space-4); }
+  ul { list-style: none; padding: 0; margin: var(--space-5) 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  ul a { display: inline-flex; align-items: center; min-height: 46px; padding: 0.5rem 1rem; border: 1.5px solid var(--c-ink); border-radius: var(--r-control); color: var(--c-ink); text-decoration: none; font-weight: 600; }
+  ul a:hover { background: var(--c-ink); color: #fff; }
+</style>

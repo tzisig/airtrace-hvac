@@ -1,0 +1,75 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { site, contact, services, areas, telLink, waLink, owner, legal } from '../config/site.config';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container grid">
+    <div class="brand">
+      <Logo dark />
+      <p>{site.tagline}. {owner.name}, {owner.role}.</p>
+      <p class="contact-lines">
+        <a href={telLink}><Icon name="phone" size={16} /> <span class="ltr">{contact.phone}</span></a>
+        <a href={waLink()}><Icon name="whatsapp" size={16} /> וואטסאפ</a>
+        <a href={`mailto:${contact.email}`}><Icon name="mail" size={16} /> {contact.email}</a>
+      </p>
+    </div>
+    <nav aria-label="שירותים">
+      <h2 class="f-title">שירותים</h2>
+      <ul>{services.map((s) => <li><a href={`/services/${s.slug}/`}>{s.title}</a></li>)}</ul>
+    </nav>
+    <nav aria-label="אזורי שירות">
+      <h2 class="f-title">אזורים</h2>
+      <ul>{areas.map((a) => <li><a href={`/areas/${a.slug}/`}>מזגנים ב{a.name}</a></li>)}</ul>
+    </nav>
+    <div>
+      <h2 class="f-title">שעות</h2>
+      <dl class="hours">
+        {contact.hours.map((h) => (<><dt>{h.days}</dt><dd><span class="ltr">{h.time}</span>{h.note && <span class="note">{h.note}</span>}</dd></>))}
+      </dl>
+      <h2 class="f-title">עוד באתר</h2>
+      <ul>
+        <li><a href="/calculator/">מחשבון כ"ס</a></li>
+        <li><a href="/troubleshooting/">המזגן לא עובד?</a></li>
+        <li><a href="/reviews/">המלצות</a></li>
+        <li><a href="/faq/">שאלות נפוצות</a></li>
+        <li><a href="/contact/">צור קשר</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container legal">
+    <p>© {year} {site.name}. ע.מ. {legal.businessId}.</p>
+    <p class="links">
+      <a href="/privacy/">מדיניות פרטיות</a>
+      <a href="/accessibility/">הצהרת נגישות</a>
+      <button type="button" data-cookie-settings>הגדרות עוגיות</button>
+    </p>
+    {site.isDemo && <p class="demo">{site.demoNote}</p>}
+  </div>
+</footer>
+
+<style>
+  .site-footer { background: var(--c-ink); color: var(--c-on-dark-muted); padding-block: var(--space-8) var(--space-5); font-size: 0.95rem; }
+  .grid { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1060px) { .grid { grid-template-columns: 1.5fr 1fr 1fr 1.1fr; } }
+  .brand p { margin: var(--space-4) 0 0; max-width: 24rem; }
+  .contact-lines { display: grid; gap: 0.45rem; }
+  .contact-lines a { display: inline-flex; align-items: center; gap: 0.5rem; }
+  a { color: var(--c-on-dark); text-decoration: none; }
+  a:hover { color: var(--c-lime); text-decoration: underline; }
+  .f-title { font: 700 1.9rem/1 var(--font-display); color: #fff; margin: 0 0 var(--space-3); }
+  .f-title:not(:first-child) { margin-top: var(--space-5); }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
+  .hours { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.9rem; margin: 0; }
+  .hours dt { color: var(--c-on-dark); }
+  .hours dd { margin: 0; white-space: nowrap; }
+  .hours .note { display: block; font-size: 0.85rem; }
+  .legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-7); padding-top: var(--space-4); border-top: 1px solid rgb(255 255 255 / 0.12); font-size: 0.875rem; }
+  .legal p { margin: 0; }
+  .links { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .links button { background: none; border: 0; padding: 0; color: var(--c-on-dark); font: inherit; cursor: pointer; }
+  .links button:hover { color: var(--c-lime); text-decoration: underline; }
+  .demo { flex-basis: 100%; color: var(--c-lime); }
+</style>

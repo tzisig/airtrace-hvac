@@ -1,0 +1,54 @@
+---
+import PlanCards from '../components/PlanCards.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import CtaPanel from '../components/CtaPanel.astro';
+import { prices, site, formatDate } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'מחירון' }];
+---
+<BaseLayout
+  title="מחירון מיזוג אוויר: התקנה, תיקון וניקוי"
+  description={`מחירון ${site.name}: התקנת מזגן מ-690 ₪, ביקור ואבחון 290 ₪, ניקוי וחיטוי 250 ₪, חוזי שירות. המחירים כוללים מע"מ.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHero
+    title="מחירון"
+    lead={prices.note}
+    crumbs={crumbs}
+    facts={[{ label: 'עודכן', value: formatDate(site.contentUpdated) }, { label: 'מע"מ', value: 'כלול' }]}
+  />
+  <section class="section">
+    <div class="container groups">
+      {prices.groups.map((g) => (
+        <div class="group">
+          <h2>{g.title}</h2>
+          <table>
+            <caption class="visually-hidden">מחירי {g.title}</caption>
+            <thead><tr><th scope="col">עבודה</th><th scope="col">מחיר</th></tr></thead>
+            <tbody>{g.rows.map((r) => <tr><td>{r.item}</td><td class="p">{r.price}</td></tr>)}</tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  </section>
+  <section class="section section--panel">
+    <div class="container">
+      <div class="head"><h2>חוזי שירות</h2><p>שני ביקורים בשנה, עדיפות בתור בקיץ והנחה על תיקונים. <a href="/services/maintenance-plan/">מה כלול בחוזה</a></p></div>
+      <PlanCards onPanel />
+    </div>
+  </section>
+  <CtaPanel title="רוצים מחיר סגור?" text="שלחו תמונה של המזגן והתווית שלו, ונחזור עם הצעת מחיר." message="שלום עומרי, אשמח להצעת מחיר. מצרף תמונה של המזגן" />
+</BaseLayout>
+
+<style>
+  .groups { display: grid; gap: var(--space-7); }
+  @media (min-width: 1000px) { .groups { grid-template-columns: repeat(3, 1fr); gap: var(--space-5); } }
+  .group h2 { font-size: clamp(2.2rem, 1.9rem + 1vw, 2.8rem); margin-bottom: var(--space-3); }
+  table { width: 100%; border-collapse: collapse; border-top: 2px solid var(--c-ink); }
+  th { text-align: start; font-size: 0.85rem; color: var(--c-slate); font-weight: 600; padding: 0.5rem 0; border-bottom: 1px solid var(--c-line); }
+  td { padding: 0.8rem 0; border-bottom: 1px solid var(--c-line); vertical-align: top; }
+  td.p { font-weight: 700; white-space: nowrap; padding-inline-start: 1rem; text-align: end; }
+  th:last-child { text-align: end; }
+</style>

@@ -1,0 +1,25 @@
+---
+import Icon from './Icon.astro';
+import { telLink, waLink } from '../config/site.config';
+---
+<nav class="mobile-bar" aria-label="יצירת קשר מהירה">
+  <a href={telLink} class="call"><Icon name="phone" size={20} /> חייגו</a>
+  <a href={waLink()} class="wa"><Icon name="whatsapp" size={20} /> וואטסאפ</a>
+  <a href="/calculator/" class="calc"><Icon name="calc" size={20} /> מחשבון</a>
+</nav>
+
+<style>
+  .mobile-bar {
+    position: fixed; inset-inline: 0; bottom: 0; z-index: 80; display: grid; grid-template-columns: 1.2fr 1.2fr 1fr;
+    gap: 1px; background: var(--c-line); padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -8px 24px -12px rgb(27 35 38 / 0.35);
+  }
+  .mobile-bar a {
+    display: flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: var(--mobile-bar);
+    font-weight: 700; text-decoration: none; font-size: 1rem;
+  }
+  .call { background: var(--c-lime); color: var(--c-ink); }
+  .wa { background: var(--c-whatsapp); color: #fff; }
+  .calc { background: var(--c-ink); color: #fff; }
+  @media (min-width: 900px) { .mobile-bar { display: none; } }
+</style>

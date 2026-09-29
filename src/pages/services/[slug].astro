@@ -1,0 +1,186 @@
+---
+import PlanCards from '../../components/PlanCards.astro';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ProcessSteps from '../../components/ProcessSteps.astro';
+import FaqList from '../../components/FaqList.astro';
+import ReviewCard from '../../components/ReviewCard.astro';
+import CtaPanel from '../../components/CtaPanel.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import CapacityDial from '../../components/CapacityDial.astro';
+import ReminderButton from '../../components/ReminderButton.astro';
+import Icon from '../../components/Icon.astro';
+import { services, areas, reviews, site, contact, formatDate, telLink, waLink } from '../../config/site.config';
+import type { Service } from '../../config/site.config';
+import { breadcrumbSchema, faqSchema, businessRef, home } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return services.map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
+}
+const { service: s } = Astro.props as { service: Service };
+
+/** Form topic for each service page (must match form.topics in the config). */
+const topicBySlug: Record<string, string> = {
+  installation: 'התקנת מזגן חדש',
+  repair: 'תיקון מזגן',
+  cleaning: 'ניקוי וחיטוי',
+  'ducted-systems': 'מיני מרכזי',
+  refrigerant: 'מילוי גז / נזילה',
+  relocation: 'העתקת מזגן',
+  'smart-control': 'שליטה חכמה',
+  'maintenance-plan': 'חוזה שירות',
+};
+
+const crumbs = [home, { label: 'שירותים', href: '/services/' }, { label: s.title }];
+const related = services.filter((x) => x.slug !== s.slug).slice(0, 3);
+const svcReviews = reviews.filter((r) => r.service === s.slug);
+const askMessage = `שלום עומרי, אשמח לפרטים על ${s.title}`;
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: s.title,
+  serviceType: s.title,
+  description: s.intro,
+  provider: businessRef,
+  areaServed: areas.map((a) => ({ '@type': 'City', name: a.name })),
+  url: `${site.url}/services/${s.slug}/`,
+  offers: { '@type': 'Offer', priceSpecification: { '@type': 'PriceSpecification', minPrice: s.priceFrom, priceCurrency: 'ILS' } },
+};
+---
+<BaseLayout
+  title={`${s.title} ${site.regionIn}`}
+  description={`${s.short} ${s.title} ב${areas.map((a) => a.name).join(', ')}. החל מ-${s.priceFrom.toLocaleString('he-IL')} ₪.`}
+  schema={[breadcrumbSchema(crumbs), serviceSchema, faqSchema(s.faq)]}
+>
+  <PageHero
+    title={s.title}
+    lead={s.intro}
+    crumbs={crumbs}
+    image={s.image}
+    imageAlt={s.imageAlt}
+    facts={[
+      { label: 'החל מ-', value: `${s.priceFrom.toLocaleString('he-IL')} ₪` },
+      { label: 'משך', value: s.duration },
+      { label: 'אחריות', value: 'שנה על העבודה' },
+    ]}
+  >
+    <div class="btn-row">
+      <a class="btn btn--ink" href={telLink}><Icon name="phone" size={19} /> <span class="ltr">{contact.phone}</span></a>
+      <a class="btn btn--wa" href={waLink(askMessage)}><Icon name="whatsapp" size={19} /> וואטסאפ</a>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container cols">
+      <div>
+        <h2>מתי פונים אלינו</h2>
+        <ul class="when">{s.when.map((w) => <li>{w}</li>)}</ul>
+      </div>
+      <div>
+        <h2>מה כלול</h2>
+        <ul class="ticks">{s.includes.map((w) => <li>{w}</li>)}</ul>
+        <p class="price-note"><strong>החל מ-{s.priceFrom.toLocaleString('he-IL')} ₪.</strong> {s.priceNote} <a href="/prices/">למחירון המלא</a></p>
+        <p class="updated">המידע עודכן ב-{formatDate(site.contentUpdated)}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--panel">
+    <div class="container">
+      <div class="head"><h2>איך זה עובד</h2></div>
+      <ProcessSteps steps={s.steps} />
+    </div>
+  </section>
+
+  {s.slug === 'installation' && (
+    <section class="section">
+      <div class="container">
+        <div class="head"><h2>כמה כ"ס צריך?</h2><p>הערכה ראשונית לפני שמגיעים למדוד.</p></div>
+        <CapacityDial id="svc-dial" />
+      </div>
+    </section>
+  )}
+
+  {s.slug === 'maintenance-plan' && (
+    <section class="section">
+      <div class="container">
+        <div class="head"><h2>המסלולים</h2><p>מחיר לשנה, כולל מע"מ. אפשר לבטל בכל עת.</p></div>
+        <PlanCards />
+        <div class="reminder">
+          <p>לא רוצים חוזה? הוסיפו תזכורת שנתית ליומן ותאמו ניקוי בזמן.</p>
+          <ReminderButton ghost />
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container cols">
+      <div>
+        <h2>שאלות על {s.title}</h2>
+        <FaqList items={s.faq} />
+      </div>
+      <div class="form-box">
+        <h2>נחזור אליכם</h2>
+        <p class="muted">{contact.responsePromise}.</p>
+        <ContactForm topic={topicBySlug[s.slug]} id="svc" />
+      </div>
+    </div>
+  </section>
+
+  {svcReviews.length > 0 && (
+    <section class="section section--panel">
+      <div class="container narrow-list">
+        <h2>מה אמרו לקוחות</h2>
+        {svcReviews.map((r) => <ReviewCard review={r} />)}
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container">
+      <div class="head"><h2>שירותים קשורים</h2></div>
+      <ul class="related">
+        {related.map((r) => (
+          <li>
+            <a href={`/services/${r.slug}/`}>
+              <Image src={r.image} alt="" widths={[400, 700]} sizes="(min-width: 900px) 380px, 100vw" loading="lazy" />
+              <strong>{r.title}</strong>
+              <span>{r.short}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="areas-line">
+        {s.title} בכל אזור השירות:{' '}
+        {areas.map((a, i) => (<>{i > 0 && ', '}<a href={`/areas/${a.slug}/`}>{a.name}</a></>))}.
+      </p>
+    </div>
+  </section>
+
+  <CtaPanel message={askMessage} />
+</BaseLayout>
+
+<style>
+  .cols { display: grid; gap: var(--space-7); }
+  @media (min-width: 960px) { .cols { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+  .when { list-style: none; padding: 0; margin: 0; border-top: 2px solid var(--c-ink); }
+  .when li { padding: 0.85rem 0; border-bottom: 1px solid var(--c-line); font-weight: 500; }
+  .price-note { margin-top: var(--space-5); padding: 1rem 1.1rem; background: var(--c-lime-soft); border-radius: var(--r-control); }
+  .form-box { background: var(--c-panel); padding: clamp(1.25rem, 3vw, 2rem); border-radius: var(--r-panel); box-shadow: var(--shadow-panel); align-self: start; }
+  .form-box h2 { margin-bottom: var(--space-2); }
+
+  .reminder { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-6); }
+  .reminder p { margin: 0; }
+
+  .narrow-list { max-width: 50rem; }
+  .related { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); }
+  @media (min-width: 800px) { .related { grid-template-columns: repeat(3, 1fr); } }
+  .related a { display: grid; gap: 0.35rem; color: inherit; text-decoration: none; }
+  .related :global(img) { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--r-panel); margin-bottom: 0.4rem; }
+  .related strong { font-size: 1.15rem; }
+  .related a:hover strong { text-decoration: underline; text-decoration-color: var(--c-lime); text-decoration-thickness: 2px; }
+  .related span { color: var(--c-slate); font-size: 0.95rem; }
+  .areas-line { margin-top: var(--space-6); color: var(--c-slate); }
+</style>

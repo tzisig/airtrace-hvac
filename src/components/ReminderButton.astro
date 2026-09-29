@@ -1,0 +1,35 @@
+---
+// Downloads an .ics file with a yearly reminder to clean the AC before summer. No data leaves the browser.
+import Icon from './Icon.astro';
+import { site, telLink } from '../config/site.config';
+interface Props { ghost?: boolean }
+const { ghost = false } = Astro.props;
+---
+<button type="button" class:list={['btn', ghost ? 'btn--ghost' : 'btn--ink']} data-ics data-name={site.name} data-tel={telLink} data-url={site.url}>
+  <Icon name="calendar" size={19} /> תזכורת שנתית ביומן
+</button>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-ics]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const now = new Date();
+      // Next April 15, 09:00 local time
+      const year = now.getMonth() > 3 || (now.getMonth() === 3 && now.getDate() >= 15) ? now.getFullYear() + 1 : now.getFullYear();
+      const d = `${year}0415`;
+      const stamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const ics = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//airtrace//reminder//HE', 'BEGIN:VEVENT',
+        `UID:${stamp}-ac-clean@airtrace`, `DTSTAMP:${stamp}`,
+        `DTSTART:${d}T090000`, `DTEND:${d}T093000`, 'RRULE:FREQ=YEARLY',
+        'SUMMARY:ניקוי מזגנים לפני הקיץ',
+        `DESCRIPTION:זמן לתאם ניקוי מזגנים לפני העומס של הקיץ. ${btn.dataset.name}: ${btn.dataset.tel?.replace('tel:', '')} ${btn.dataset.url}`,
+        'END:VEVENT', 'END:VCALENDAR',
+      ].join('\r\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+      a.download = 'ac-cleaning-reminder.ics';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+  });
+</script>

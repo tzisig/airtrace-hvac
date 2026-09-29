@@ -1,0 +1,72 @@
+---
+// "What is the AC doing?" Pick a symptom, get the likely cause, safe checks and a prefilled WhatsApp message.
+import Icon from './Icon.astro';
+import { symptoms, serviceBySlug, waLink } from '../config/site.config';
+interface Props { limit?: number }
+const { limit } = Astro.props;
+const list = limit ? symptoms.slice(0, limit) : symptoms;
+---
+<div class="finder" data-finder>
+  <div class="picks" role="group" aria-label="מה המזגן עושה?">
+    {list.map((s, i) => (
+      <button type="button" class="pick" aria-pressed={i === 0 ? 'true' : 'false'} aria-controls={`sym-${s.id}`} data-pick={s.id}>
+        <Icon name={s.icon} size={22} /><span>{s.label}</span>
+      </button>
+    ))}
+  </div>
+  <div class="panels">
+    {list.map((s, i) => {
+      const svc = serviceBySlug(s.service);
+      return (
+        <article class="panel" id={`sym-${s.id}`} data-panel={s.id} hidden={i !== 0}>
+          <h3>{s.label}</h3>
+          <p class="likely"><strong>מה כנראה קורה:</strong> {s.likely}</p>
+          <h4>מה אפשר לבדוק לבד, בבטחה</h4>
+          <ol class="checks">{s.checks.map((c) => <li>{c}</li>)}</ol>
+          <p class="call"><Icon name="alert" size={18} /> <span><strong>מתי להתקשר:</strong> {s.callIf}</span></p>
+          <div class="btn-row">
+            <a class="btn btn--wa" href={waLink(s.whatsapp)}><Icon name="whatsapp" size={19} /> לשלוח לעומרי בוואטסאפ</a>
+            {svc && <a class="btn btn--ghost" href={`/services/${svc.slug}/`}>{svc.title}</a>}
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</div>
+
+<style>
+  .finder { display: grid; gap: var(--space-5); }
+  @media (min-width: 900px) { .finder { grid-template-columns: 0.9fr 1.1fr; align-items: start; gap: var(--space-6); } }
+  .picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem; }
+  .pick {
+    display: flex; align-items: center; gap: 0.6rem; min-height: 58px; padding: 0.6rem 0.85rem; text-align: start;
+    font: 600 0.97rem/1.25 var(--font-body); color: var(--c-ink); background: var(--c-panel);
+    border: 1.5px solid var(--c-line); border-radius: var(--r-control); cursor: pointer;
+    transition: border-color 150ms, background-color 150ms;
+  }
+  .pick :global(svg) { flex: none; color: var(--c-slate); }
+  .pick:hover { border-color: var(--c-ink); }
+  .pick[aria-pressed='true'] { background: var(--c-ink); border-color: var(--c-ink); color: #fff; }
+  .pick[aria-pressed='true'] :global(svg) { color: var(--c-lime); }
+  .panel { background: var(--c-panel); border-radius: var(--r-panel); padding: clamp(1.25rem, 3vw, 2rem); border-top: 4px solid var(--c-lime); box-shadow: var(--shadow-panel); }
+  .panel h3 { font: 700 2.4rem/0.95 var(--font-display); margin-bottom: var(--space-3); }
+  .panel h4 { margin-top: var(--space-4); }
+  .checks { padding-inline-start: 1.2rem; }
+  .checks li { margin-bottom: 0.35rem; }
+  .call { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.75rem 0.9rem; background: #FFF4EC; border-radius: var(--r-control); }
+  .call :global(svg) { flex: none; margin-top: 0.3rem; color: #A4461A; }
+  :global(.no-js) .panel[hidden] { display: block; margin-top: var(--space-4); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-finder]').forEach((root) => {
+    const picks = root.querySelectorAll<HTMLButtonElement>('[data-pick]');
+    picks.forEach((btn) => btn.addEventListener('click', () => {
+      picks.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      root.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => { p.hidden = p.dataset.panel !== btn.dataset.pick; });
+      if (window.matchMedia('(max-width: 899px)').matches) {
+        root.querySelector<HTMLElement>(`[data-panel="${btn.dataset.pick}"]`)?.scrollIntoView({ block: 'start' });
+      }
+    }));
+  });
+</script>

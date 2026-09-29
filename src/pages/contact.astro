@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ContactForm from '../components/ContactForm.astro';
+import Icon from '../components/Icon.astro';
+import { contact, site, areas, telLink, waLink } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'צור קשר' }];
+---
+<BaseLayout
+  title="צור קשר: טלפון, וואטסאפ וטופס"
+  description={`יצירת קשר עם ${site.name}: טלפון ${contact.phone}, וואטסאפ או טופס קצר. ${contact.sameDayLabel}. שעות פעילות ואזורי שירות.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHero title="דברו איתנו" lead={`הכי מהיר: טלפון או וואטסאפ. ${contact.responsePromise}.`} crumbs={crumbs} />
+  <section class="section">
+    <div class="container grid">
+      <div class="channels">
+        <a class="channel" href={telLink}>
+          <Icon name="phone" size={26} />
+          <span><strong class="ltr">{contact.phone}</strong><span>שיחה ישירה עם עומרי</span></span>
+        </a>
+        <a class="channel wa" href={waLink()}>
+          <Icon name="whatsapp" size={26} />
+          <span><strong>וואטסאפ</strong><span>אפשר לצרף תמונה של המזגן ושל התווית</span></span>
+        </a>
+        <a class="channel" href={`mailto:${contact.email}`}>
+          <Icon name="mail" size={26} />
+          <span><strong>{contact.email}</strong><span>להצעות מחיר לפרויקטים ולוועדי בתים</span></span>
+        </a>
+        <h2 class="small-h">שעות פעילות</h2>
+        <dl class="hours">
+          {contact.hours.map((h) => (<div><dt>{h.days}</dt><dd><span class="ltr">{h.time}</span>{h.note && <span class="note">{h.note}</span>}</dd></div>))}
+        </dl>
+        <p class="muted">אזורי שירות: {areas.map((a, i) => (<>{i > 0 && ', '}<a href={`/areas/${a.slug}/`}>{a.name}</a></>))}.</p>
+      </div>
+      <div class="form-box">
+        <h2>או השאירו פרטים</h2>
+        <p class="muted">שם, טלפון ובמה אפשר לעזור. זה הכול.</p>
+        <ContactForm id="contact" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .grid { display: grid; gap: var(--space-7); }
+  @media (min-width: 960px) { .grid { grid-template-columns: 0.9fr 1.1fr; gap: var(--space-8); } }
+  .channels { display: grid; gap: var(--space-3); align-content: start; }
+  .channel {
+    display: flex; align-items: center; gap: var(--space-4); padding: 1.1rem 1.25rem; border-radius: var(--r-panel);
+    background: var(--c-panel); border: 1.5px solid var(--c-line); color: var(--c-ink); text-decoration: none;
+  }
+  .channel:hover { border-color: var(--c-ink); }
+  .channel :global(svg) { flex: none; color: var(--c-lime-deep); }
+  .channel.wa :global(svg) { color: var(--c-whatsapp); }
+  .channel > span { display: grid; }
+  .channel strong { font-size: 1.2rem; }
+  .channel span span { color: var(--c-slate); font-size: 0.93rem; }
+  .small-h { font-size: clamp(2rem, 1.8rem + 0.8vw, 2.6rem); margin: var(--space-5) 0 var(--space-2); }
+  .hours { margin: 0; border-top: 2px solid var(--c-ink); }
+  .hours div { display: flex; justify-content: space-between; gap: var(--space-4); padding: 0.7rem 0; border-bottom: 1px solid var(--c-line); }
+  .hours dt { font-weight: 600; }
+  .hours dd { margin: 0; text-align: end; }
+  .hours .note { display: block; font-size: 0.85rem; color: var(--c-slate); }
+  .form-box { background: var(--c-panel); padding: clamp(1.25rem, 3vw, 2.25rem); border-radius: var(--r-panel); box-shadow: var(--shadow-panel); align-self: start; }
+  .form-box h2 { margin-bottom: var(--space-2); }
+</style>

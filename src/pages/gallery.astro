@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import BeforeAfter from '../components/BeforeAfter.astro';
+import CtaPanel from '../components/CtaPanel.astro';
+import { gallery, galleryCategories, site, areas } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'עבודות לפני ואחרי' }];
+const areaSlug = (city: string) => areas.find((a) => a.name === city)?.slug;
+---
+<BaseLayout
+  title="עבודות מיזוג אוויר: לפני ואחרי"
+  description={`עבודות של ${site.name}: החלפת מזגנים ישנים, התקנות מסודרות וניקוי מעבים ${site.regionIn}. מה הייתה הבעיה ומה עשינו.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHero
+    title="לפני ואחרי"
+    lead="מה מצאנו, מה עשינו ואיך זה נראה בסוף. לחצו על אחרי בכל עבודה כדי לראות את התוצאה."
+    crumbs={crumbs}
+  />
+  <section class="section">
+    <div class="container">
+      <div class="filters" role="group" aria-label="סינון לפי סוג עבודה" data-filters>
+        <button type="button" aria-pressed="true" data-filter="all">הכול</button>
+        {galleryCategories.map((c) => <button type="button" aria-pressed="false" data-filter={c}>{c}</button>)}
+      </div>
+      <ul class="projects">
+        {gallery.map((g) => (
+          <li data-cat={g.category}>
+            <BeforeAfter before={g.before} after={g.after} beforeAlt={g.beforeAlt} afterAlt={g.afterAlt} label={`לפני ואחרי: ${g.title}`} />
+            <div class="info">
+              <p class="cat">{g.category}, {areaSlug(g.city) ? <a href={`/areas/${areaSlug(g.city)}/`}>{g.city}</a> : g.city}</p>
+              <h2>{g.title}</h2>
+              <dl>
+                <div><dt>הבעיה</dt><dd>{g.problem}</dd></div>
+                <div><dt>מה עשינו</dt><dd>{g.solution}</dd></div>
+              </dl>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="note">{site.isDemo ? 'התמונות באתר ההדגמה הן תמונות סטוק להמחשה.' : ''}</p>
+    </div>
+  </section>
+  <CtaPanel title="רוצים תוצאה כזאת אצלכם?" message="שלום עומרי, ראיתי את העבודות באתר ואשמח להצעת מחיר" />
+</BaseLayout>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: var(--space-6); }
+  :global(.no-js) .filters { display: none; }
+  .filters button {
+    min-height: 44px; padding: 0.4rem 1rem; border-radius: var(--r-control); border: 1.5px solid var(--c-line);
+    background: var(--c-panel); font: 600 0.97rem var(--font-body); color: var(--c-ink); cursor: pointer;
+  }
+  .filters button[aria-pressed='true'] { background: var(--c-ink); color: #fff; border-color: var(--c-ink); }
+  .projects { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-8); }
+  .projects li { display: grid; gap: var(--space-5); align-items: center; }
+  @media (min-width: 900px) {
+    .projects li { grid-template-columns: 1.2fr 0.8fr; gap: var(--space-7); }
+    .projects li:nth-child(even) > :global(:first-child) { order: 2; }
+  }
+  .projects li[hidden] { display: none; }
+  .cat { color: var(--c-slate); font-weight: 600; margin-bottom: var(--space-2); }
+  .info h2 { font-size: clamp(2.4rem, 2rem + 1.6vw, 3.4rem); }
+  dl { margin: 0; display: grid; gap: var(--space-3); }
+  dt { font-weight: 700; }
+  dd { margin: 0; color: var(--c-slate); }
+  .note { margin-top: var(--space-7); font-size: 0.9rem; color: var(--c-slate); }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-filters]');
+  if (bar) {
+    const btns = bar.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    btns.forEach((b) => b.addEventListener('click', () => {
+      btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      document.querySelectorAll<HTMLElement>('[data-cat]').forEach((li) => {
+        li.hidden = b.dataset.filter !== 'all' && li.dataset.cat !== b.dataset.filter;
+      });
+    }));
+  }
+</script>

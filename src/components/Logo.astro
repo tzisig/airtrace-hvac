@@ -1,0 +1,29 @@
+---
+// Brand mark: a thermostat dial with the setpoint tick, plus the name set in the display face.
+import { site } from '../config/site.config';
+interface Props { dark?: boolean; href?: string }
+const { dark = false, href = '/' } = Astro.props;
+---
+<a class:list={['logo', { dark }]} href={href}>
+  <svg class="mark" viewBox="0 0 48 48" width="42" height="42" aria-hidden="true" focusable="false">
+    <rect width="48" height="48" rx="11" fill="var(--c-ink)" />
+    <path d="M14.1 33.9A14 14 0 1 1 33.9 33.9" fill="none" stroke="#56636A" stroke-width="4" stroke-linecap="round" />
+    <path d="M14.1 33.9A14 14 0 0 1 17 12.9" fill="none" stroke="var(--c-lime)" stroke-width="4" stroke-linecap="round" />
+    <path d="M17.5 25.5c2-2 4-2 6 0s4 2 6 0" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" />
+  </svg>
+  <span class="words">
+    <span class="name">{site.shortName}</span>{' '}
+    <span class="trade">{site.trade}</span>
+  </span>
+</a>
+
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; color: var(--c-ink); }
+  .mark { flex: none; }
+  .dark .mark rect { fill: #0F1517; }
+  .words { display: grid; line-height: 1; }
+  .name { font: 700 2.1rem/0.85 var(--font-display); }
+  .trade { font-size: 0.8rem; font-weight: 600; color: var(--c-slate); }
+  .dark { color: #fff; }
+  .dark .trade { color: var(--c-on-dark-muted); }
+</style>

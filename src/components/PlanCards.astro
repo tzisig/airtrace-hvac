@@ -1,0 +1,29 @@
+---
+// Maintenance plan tiers from `plans` in the config. onPanel: the section behind is white, so cards use the frost tone.
+import { plans, waLink } from '../config/site.config';
+interface Props { onPanel?: boolean }
+const { onPanel = false } = Astro.props;
+---
+<div class:list={['plans', { 'on-panel': onPanel }]}>
+  {plans.map((p) => (
+    <article class:list={['plan', { featured: p.featured }]}>
+      <h3>{p.name}</h3>
+      <p class="units">{p.units}</p>
+      <p class="p-price">{p.price.toLocaleString('he-IL')} ₪<span> לשנה</span></p>
+      <ul class="ticks">{p.features.map((f) => <li>{f}</li>)}</ul>
+      <a class:list={['btn', { 'btn--ghost': !p.featured }]} href={waLink(`שלום, אשמח להצטרף לחוזה שירות, מסלול ${p.name}`)}>הצטרפות במסלול {p.name}</a>
+    </article>
+  ))}
+</div>
+
+<style>
+  .plans { display: grid; gap: var(--space-4); }
+  @media (min-width: 900px) { .plans { grid-template-columns: repeat(3, 1fr); align-items: start; } }
+  .plan { background: var(--c-panel); border: 1.5px solid var(--c-line); border-radius: var(--r-panel); padding: 1.5rem; display: grid; gap: var(--space-3); }
+  .on-panel .plan { background: var(--c-frost); }
+  .plan.featured { background: var(--c-panel); border: 2px solid var(--c-ink); box-shadow: 0 0 0 4px var(--c-lime-soft); }
+  .plan h3 { font: 700 2.4rem/1 var(--font-display); margin: 0; }
+  .units { margin: 0; color: var(--c-slate); }
+  .p-price { font: 700 3rem/1 var(--font-display); margin: 0; }
+  .p-price span { font: 500 1rem var(--font-body); color: var(--c-slate); }
+</style>

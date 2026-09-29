@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ServiceList from '../../components/ServiceList.astro';
+import ProcessSteps from '../../components/ProcessSteps.astro';
+import CtaPanel from '../../components/CtaPanel.astro';
+import { services, site, images } from '../../config/site.config';
+import { breadcrumbSchema, home } from '../../lib/schema';
+
+const crumbs = [home, { label: 'שירותים' }];
+const itemList = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement: services.map((s, i) => ({ '@type': 'ListItem', position: i + 1, name: s.title, url: `${site.url}/services/${s.slug}/` })),
+};
+const visit = [
+  { title: 'שיחה', text: 'מתארים מה קורה בטלפון או בוואטסאפ, רצוי עם תמונה של תווית המזגן.' },
+  { title: 'ביקור', text: 'מגיעים בחלון זמן של שעה, עם חלקים נפוצים ברכב.' },
+  { title: 'מחיר סגור', text: 'אומרים מה מצאנו וכמה זה עולה, לפני שנוגעים בכלים.' },
+  { title: 'עבודה ואחריות', text: 'מבצעים, בודקים ומשאירים אחריות בכתב.' },
+];
+---
+<BaseLayout
+  title="שירותי מיזוג אוויר: התקנה, תיקון, ניקוי וגז"
+  description={`כל שירותי המיזוג של ${site.name}: התקנת מזגנים, תיקונים, ניקוי וחיטוי, מיני מרכזי, מילוי גז, העתקה, שליטה חכמה וחוזה שירות. מחיר התחלתי לכל שירות.`}
+  schema={[breadcrumbSchema(crumbs), itemList]}
+>
+  <PageHero
+    title="שירותי מיזוג אוויר"
+    lead="מהתקנה של מזגן ראשון ועד מערכת מיני מרכזי לכל הבית. לכל שירות יש עמוד עם מה כלול, כמה זמן זה לוקח ומאיזה מחיר מתחילים."
+    crumbs={crumbs}
+    image={images.tools}
+    imageAlt={images.toolsAlt}
+  />
+  <section class="section">
+    <div class="container"><ServiceList items={services} /></div>
+  </section>
+  <section class="section section--panel">
+    <div class="container">
+      <div class="head"><h2>איך נראה ביקור</h2><p>אותו סדר בכל עבודה, קטנה או גדולה.</p></div>
+      <ProcessSteps steps={visit} />
+    </div>
+  </section>
+  <CtaPanel title="לא בטוחים איזה שירות צריך?" text="שלחו תמונה של המזגן ותיאור קצר, ונגיד לכם מה כנראה קורה ומה המחיר המשוער." />
+</BaseLayout>

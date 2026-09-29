@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ReviewCard from '../../components/ReviewCard.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import CtaPanel from '../../components/CtaPanel.astro';
+import Icon from '../../components/Icon.astro';
+import { areas, services, reviews, site, contact, serviceBySlug, telLink, waLink } from '../../config/site.config';
+import type { Area } from '../../config/site.config';
+import { breadcrumbSchema, businessRef, home } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return areas.map((a) => ({ params: { slug: a.slug }, props: { area: a } }));
+}
+const { area: a } = Astro.props as { area: Area };
+
+const crumbs = [home, { label: 'אזורי שירות', href: '/areas/' }, { label: a.name }];
+const localReviews = reviews.filter((r) => r.city === a.name);
+const others = areas.filter((x) => x.slug !== a.slug);
+const message = `שלום עומרי, אני מ${a.name} ואשמח לעזרה עם המזגן`;
+const placeSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `טכנאי מיזוג אוויר ב${a.name}`,
+  serviceType: 'מיזוג אוויר',
+  provider: businessRef,
+  areaServed: { '@type': 'City', name: a.name },
+  url: `${site.url}/areas/${a.slug}/`,
+};
+---
+<BaseLayout
+  title={`טכנאי מזגנים ב${a.name}: התקנה, תיקון וניקוי`}
+  description={`טכנאי מיזוג אוויר ב${a.name}: ${a.summary} הגעה בדרך כלל תוך ${a.arrival}. ${contact.sameDayLabel}.`}
+  schema={[breadcrumbSchema(crumbs), placeSchema]}
+>
+  <PageHero
+    title={`טכנאי מזגנים ב${a.name}`}
+    lead={a.summary}
+    crumbs={crumbs}
+    image={a.image}
+    imageAlt={a.imageAlt}
+    facts={[
+      { label: 'זמן הגעה רגיל', value: a.arrival },
+      { label: 'בקיץ', value: 'תיקון באותו יום' },
+      { label: 'שכונות', value: `${a.neighborhoods.length} ויותר` },
+    ]}
+  >
+    <div class="btn-row">
+      <a class="btn btn--ink" href={telLink}><Icon name="phone" size={19} /> <span class="ltr">{contact.phone}</span></a>
+      <a class="btn btn--wa" href={waLink(message)}><Icon name="whatsapp" size={19} /> וואטסאפ</a>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container cols">
+      <div class="prose">
+        <h2>מיזוג אוויר ב{a.name}, מה שחשוב לדעת</h2>
+        {a.body.map((p) => <p>{p}</p>)}
+        <h3>שכונות שאנחנו מגיעים אליהן</h3>
+        <ul class="hoods">{a.neighborhoods.map((n) => <li>{n}</li>)}</ul>
+      </div>
+      <aside class="local">
+        <h2>מה אנחנו פוגשים ב{a.name}</h2>
+        <ul>
+          {a.local.map((l) => {
+            const svc = serviceBySlug(l.service);
+            return (
+              <li>
+                <h3>{l.title}</h3>
+                <p>{l.text}</p>
+                {svc && <a href={`/services/${svc.slug}/`}>{svc.title} ב{a.name}</a>}
+              </li>
+            );
+          })}
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--panel">
+    <div class="container">
+      <div class="head"><h2>כל השירותים ב{a.name}</h2></div>
+      <ul class="svc-chips">
+        {services.map((s) => (
+          <li><a href={`/services/${s.slug}/`}><Icon name={s.icon} size={18} /> {s.title}</a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container cols">
+      <div>
+        {localReviews.length > 0 ? (
+          <>
+            <h2>לקוחות מ{a.name}</h2>
+            {localReviews.map((r) => <ReviewCard review={r} />)}
+          </>
+        ) : (
+          <>
+            <h2>מה אומרים עלינו</h2>
+            {reviews.slice(0, 2).map((r) => <ReviewCard review={r} />)}
+          </>
+        )}
+        <p class="others">
+          אזורים נוספים:{' '}
+          {others.map((o, i) => (<>{i > 0 && ', '}<a href={`/areas/${o.slug}/`}>{o.name}</a></>))}.
+        </p>
+      </div>
+      <div class="form-box">
+        <h2>לתאם טכנאי ב{a.name}</h2>
+        <p class="muted">{contact.responsePromise}.</p>
+        <ContactForm id="area" />
+      </div>
+    </div>
+  </section>
+
+  <CtaPanel message={message} />
+</BaseLayout>
+
+<style>
+  .cols { display: grid; gap: var(--space-7); }
+  @media (min-width: 960px) { .cols { grid-template-columns: 1.2fr 0.8fr; gap: var(--space-8); } }
+  .prose h2 { margin-top: 0; }
+  .hoods { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .hoods li { padding: 0.3rem 0.8rem; border: 1.5px solid var(--c-ink); border-radius: var(--r-control); font-weight: 600; font-size: 0.95rem; }
+  .local { align-self: start; background: var(--c-ink); color: var(--c-on-dark); border-radius: var(--r-panel); padding: clamp(1.25rem, 3vw, 2rem); }
+  .local h2 { font-size: clamp(2.2rem, 1.9rem + 1.2vw, 3rem); }
+  .local ul { list-style: none; padding: 0; margin: 0; }
+  .local li { padding: var(--space-4) 0; border-top: 1px solid rgb(255 255 255 / 0.14); }
+  .local h3 { color: #fff; margin-bottom: 0.25rem; }
+  .local p { color: var(--c-on-dark-muted); margin-bottom: 0.4rem; }
+  .local a { color: var(--c-lime); font-weight: 600; }
+  .svc-chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .svc-chips a {
+    display: inline-flex; align-items: center; gap: 0.45rem; min-height: 46px; padding: 0.5rem 1rem;
+    background: var(--c-frost); border: 1.5px solid var(--c-line); border-radius: var(--r-control);
+    color: var(--c-ink); text-decoration: none; font-weight: 600;
+  }
+  .svc-chips a:hover { border-color: var(--c-ink); }
+  .svc-chips :global(svg) { color: var(--c-lime-deep); }
+  .others { margin-top: var(--space-5); color: var(--c-slate); }
+  .form-box { background: var(--c-panel); padding: clamp(1.25rem, 3vw, 2rem); border-radius: var(--r-panel); box-shadow: var(--shadow-panel); align-self: start; }
+</style>

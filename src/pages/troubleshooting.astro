@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SymptomFinder from '../components/SymptomFinder.astro';
+import CtaPanel from '../components/CtaPanel.astro';
+import ReminderButton from '../components/ReminderButton.astro';
+import { symptoms, contact, images } from '../config/site.config';
+import { breadcrumbSchema, faqSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'המזגן לא עובד?' }];
+const symptomFaq = symptoms.map((s) => ({ q: `מזגן: ${s.label}. מה עושים?`, a: `${s.likely} ${s.checks.join(' ')} ${s.callIf}` }));
+---
+<BaseLayout
+  title="המזגן לא עובד? בדיקות ראשונות ומתי להתקשר"
+  description="מזגן שלא מקרר, מטפטף, מרעיש, מציג קוד תקלה או מקפיץ את המפסק: מה כנראה קורה, מה בטוח לבדוק לבד ומתי להזמין טכנאי."
+  schema={[breadcrumbSchema(crumbs), faqSchema(symptomFaq)]}
+>
+  <PageHero
+    title="המזגן לא עובד? מתחילים כאן"
+    lead={`בחרו מה המזגן עושה. תקבלו את הסיבה הנפוצה, מה אפשר לבדוק בבטחה לבד, ומתי כדאי להפסיק ולהתקשר. ${contact.sameDayLabel}.`}
+    crumbs={crumbs}
+    image={images.urgent}
+    imageAlt={images.urgentAlt}
+  />
+  <section class="section">
+    <div class="container">
+      <div class="head"><h2>מה המזגן עושה?</h2><p>לחצו על מה שמתאים. אפשר לעבור בין התקלות.</p></div>
+      <SymptomFinder />
+    </div>
+  </section>
+  <section class="section section--panel">
+    <div class="container cols">
+      <div class="prose">
+        <h2>שלושה דברים שמונעים את רוב הקריאות בקיץ</h2>
+        <ul>
+          <li><strong>לשטוף מסננים פעם בחודש</strong> בזמן שהמזגן בשימוש. מסנן סתום הוא הסיבה הנפוצה ביותר למזגן שלא מקרר ולטפטוף.</li>
+          <li><strong>להפעיל את המזגן לחצי שעה באפריל</strong>, לפני החום. אם יש תקלה, עדיף לגלות אותה כשהתור קצר.</li>
+          <li><strong>לפנות מקום ליחידה החיצונית.</strong> עציצים, מחסנים ובדים שמכסים את המעבה חונקים אותו.</li>
+        </ul>
+      </div>
+      <div class="reminder">
+        <h2>תזכורת לאביב</h2>
+        <p>קובץ יומן עם תזכורת שנתית ב-15 באפריל: לבדוק את המזגנים ולתאם ניקוי לפני העומס.</p>
+        <ReminderButton />
+      </div>
+    </div>
+  </section>
+  <CtaPanel />
+</BaseLayout>
+
+<style>
+  .cols { display: grid; gap: var(--space-7); }
+  @media (min-width: 960px) { .cols { grid-template-columns: 1.3fr 0.7fr; gap: var(--space-8); } }
+  .prose h2 { margin-top: 0; }
+  .prose li { margin-bottom: 0.8rem; }
+  .reminder { background: var(--c-frost); border-radius: var(--r-panel); padding: clamp(1.25rem, 3vw, 2rem); align-self: start; }
+</style>

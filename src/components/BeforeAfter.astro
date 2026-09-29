@@ -1,0 +1,58 @@
+---
+// Before/after as a two-state switch: the demo pairs are different scenes, so a wipe slider would cut both
+// subjects in half. Without JS both photos show one under the other.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  before: ImageMetadata;
+  after: ImageMetadata;
+  beforeAlt: string;
+  afterAlt: string;
+  /** Accessible name of the switch group. */
+  label: string;
+  sizes?: string;
+}
+const { before, after, beforeAlt, afterAlt, label, sizes = '(min-width: 860px) 600px, 100vw' } = Astro.props;
+---
+<div class="ba" data-ba data-state="before">
+  <div class="frame">
+    <Image class="img before" src={before} alt={beforeAlt} widths={[480, 800, 1100]} sizes={sizes} loading="lazy" />
+    <Image class="img after" src={after} alt={afterAlt} widths={[480, 800, 1100]} sizes={sizes} loading="lazy" />
+  </div>
+  <div class="switch" role="group" aria-label={label}>
+    <button type="button" aria-pressed="true" data-ba-btn="before">לפני</button>
+    <button type="button" aria-pressed="false" data-ba-btn="after">אחרי</button>
+  </div>
+</div>
+
+<style>
+  .ba { position: relative; }
+  .frame { position: relative; aspect-ratio: 4 / 3; border-radius: var(--r-panel); overflow: hidden; background: var(--c-line); }
+  .frame :global(.img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 260ms var(--ease); }
+  .frame :global(.after) { opacity: 0; }
+  [data-state='after'] .frame :global(.after) { opacity: 1; }
+  [data-state='after'] .frame :global(.before) { opacity: 0; }
+  .switch {
+    position: absolute; top: 0.8rem; inset-inline-start: 0.8rem; display: flex; padding: 3px;
+    background: rgb(27 35 38 / 0.85); border-radius: 999px;
+  }
+  .switch button {
+    min-height: 40px; min-width: 64px; padding: 0.3rem 0.9rem; border: 0; border-radius: 999px; cursor: pointer;
+    font: 700 0.95rem var(--font-body); background: transparent; color: #fff;
+  }
+  .switch button[aria-pressed='true'] { background: var(--c-lime); color: var(--c-ink); }
+  :global(.no-js) .frame { aspect-ratio: auto; display: grid; gap: 4px; }
+  :global(.no-js) .frame :global(.img) { position: static; opacity: 1; aspect-ratio: 4 / 3; }
+  :global(.no-js) .switch { display: none; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-ba]').forEach((el) => {
+    const btns = el.querySelectorAll<HTMLButtonElement>('[data-ba-btn]');
+    btns.forEach((b) => b.addEventListener('click', () => {
+      el.dataset.state = b.dataset.baBtn;
+      btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    }));
+  });
+</script>

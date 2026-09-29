@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaPanel from '../components/CtaPanel.astro';
+import { faq, services, site } from '../config/site.config';
+import { breadcrumbSchema, faqSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'שאלות נפוצות' }];
+const byService = services.filter((s) => s.faq.length);
+---
+<BaseLayout
+  title="שאלות נפוצות על מזגנים ושירות"
+  description={`תשובות על זמני הגעה, מחירים, אחריות, ניקוי, גז והספק מזגן. שאלות נפוצות ללקוחות ${site.name}.`}
+  schema={[breadcrumbSchema(crumbs), faqSchema(faq)]}
+>
+  <PageHero title="שאלות נפוצות" lead="התשובות לשאלות שאנחנו שומעים הכי הרבה בטלפון. לא מצאתם? שלחו הודעה." crumbs={crumbs} />
+  <section class="section">
+    <div class="container narrow">
+      <h2>על השירות</h2>
+      <FaqList items={faq} />
+    </div>
+  </section>
+  <section class="section section--panel">
+    <div class="container narrow">
+      <h2>לפי שירות</h2>
+      {byService.map((s) => (
+        <div class="group">
+          <h3><a href={`/services/${s.slug}/`}>{s.title}</a></h3>
+          <FaqList items={s.faq} />
+        </div>
+      ))}
+    </div>
+  </section>
+  <CtaPanel title="השאלה שלכם לא כאן?" text="שלחו אותה בוואטסאפ ונענה, בדרך כלל תוך שעה." message="שלום עומרי, יש לי שאלה על המזגן" />
+</BaseLayout>
+
+<style>
+  .group { margin-top: var(--space-6); }
+  .group h3 { font-size: 1.3rem; }
+</style>

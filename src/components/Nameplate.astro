@@ -1,0 +1,40 @@
+---
+// Trust facts laid out like the rating plate on an AC unit: a riveted plate with spec rows.
+import { owner, stats, contact } from '../config/site.config';
+interface Props { dark?: boolean }
+const { dark = false } = Astro.props;
+const rows = [
+  { k: 'טכנאי', v: owner.name },
+  { k: 'תעודת מקצוע', v: `מס' ${owner.licenseNo}` },
+  { k: 'בשטח מאז', v: `${owner.since} (${stats.years} שנים)` },
+  { k: 'התקנות', v: `${stats.installs.toLocaleString('he-IL')}+` },
+  { k: 'דירוג לקוחות', v: `${stats.rating} מתוך 5, ${stats.reviewCount} ביקורות` },
+  { k: 'בקיץ', v: `${stats.sameDayShare}% מהתיקונים באותו יום` },
+  { k: 'בסיס', v: contact.baseArea },
+];
+---
+<div class:list={['plate', { dark }]}>
+  <span class="rivet r1" aria-hidden="true"></span><span class="rivet r2" aria-hidden="true"></span>
+  <span class="rivet r3" aria-hidden="true"></span><span class="rivet r4" aria-hidden="true"></span>
+  <p class="plate-title">לוחית נתונים</p>
+  <dl>
+    {rows.map((r) => (<div><dt>{r.k}</dt><dd>{r.v}</dd></div>))}
+  </dl>
+</div>
+
+<style>
+  .plate {
+    position: relative; padding: 1.4rem 1.6rem 1.2rem; border-radius: 6px;
+    background: linear-gradient(160deg, #F7F9F9, #E3E8EA); border: 1px solid #C4CDD1;
+    box-shadow: inset 0 1px 0 #fff, 0 12px 30px -20px rgb(27 35 38 / 0.5);
+  }
+  .rivet { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, #9AA6AB); }
+  .r1 { top: 8px; right: 8px; } .r2 { top: 8px; left: 8px; } .r3 { bottom: 8px; right: 8px; } .r4 { bottom: 8px; left: 8px; }
+  .plate-title { margin: 0 0 0.6rem; font: 700 1.7rem/1 var(--font-display); border-bottom: 2px solid var(--c-ink); padding-bottom: 0.45rem; }
+  dl { margin: 0; display: grid; }
+  dl div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0.75rem; padding: 0.45rem 0; border-bottom: 1px dashed #B7C2C6; font-size: 0.95rem; }
+  dl div:last-child { border-bottom: 0; }
+  dt { color: var(--c-slate); }
+  dd { margin: 0; font-weight: 700; }
+  @media (max-width: 420px) { dl div { grid-template-columns: 1fr; gap: 0; } }
+</style>

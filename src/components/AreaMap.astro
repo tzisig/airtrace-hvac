@@ -1,0 +1,37 @@
+---
+// Schematic map of the service area: base, cities and arrival times. The list below it carries the same data as text.
+import { areas, baseMap, contact } from '../config/site.config';
+---
+<div class="area-map">
+  <svg viewBox="0 0 100 100" role="img" aria-labelledby="map-title" preserveAspectRatio="xMidYMid meet">
+    <title id="map-title">מפה סכמטית של אזור השירות, מ{contact.baseArea} לערי השרון</title>
+    <path class="sea" d="M0 0 H14 C12 20 16 35 11 50 C7 65 12 80 6 100 H0 Z" />
+    <text class="sea-label" x="5" y="58" transform="rotate(-90 5 58)">הים התיכון</text>
+    {areas.map((a) => (
+      <line class="route" x1={baseMap.x} y1={baseMap.y} x2={a.map.x} y2={a.map.y} />
+    ))}
+    <circle class="ring" cx={baseMap.x} cy={baseMap.y} r="7" />
+    {areas.map((a) => (
+      <a href={`/areas/${a.slug}/`}>
+        <g class="city">
+          <circle cx={a.map.x} cy={a.map.y} r={a.map.x === baseMap.x && a.map.y === baseMap.y ? 3.2 : 2.4} />
+          <text x={a.map.x} y={a.map.y - 4.5} text-anchor="middle">{a.name}</text>
+          <text class="eta" x={a.map.x} y={a.map.y + 7.5} text-anchor="middle">{a.arrival}</text>
+        </g>
+      </a>
+    ))}
+  </svg>
+</div>
+
+<style>
+  .area-map { background: var(--c-ink); border-radius: var(--r-panel); padding: 0.75rem; }
+  svg { width: 100%; height: auto; aspect-ratio: 1; font-family: var(--font-body); }
+  .sea { fill: #25556A; }
+  .sea-label { fill: #8FC0D3; font-size: 3px; font-weight: 600; }
+  .route { stroke: rgb(255 255 255 / 0.25); stroke-width: 0.5; stroke-dasharray: 1.4 1.2; }
+  .ring { fill: none; stroke: var(--c-lime); stroke-width: 0.6; opacity: 0.6; }
+  .city circle { fill: var(--c-lime); }
+  .city text { fill: #fff; font-size: 4px; font-weight: 700; }
+  .city .eta { fill: var(--c-on-dark-muted); font-size: 3.2px; font-weight: 500; }
+  a:hover .city text:first-of-type, a:focus-visible .city text:first-of-type { fill: var(--c-lime); text-decoration: underline; }
+</style>

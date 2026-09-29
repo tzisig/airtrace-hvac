@@ -1,0 +1,83 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Nameplate from '../components/Nameplate.astro';
+import CtaPanel from '../components/CtaPanel.astro';
+import { owner, site, images, stats, contact } from '../config/site.config';
+import { breadcrumbSchema, businessRef, home } from '../lib/schema';
+
+const crumbs = [home, { label: `אודות ${owner.firstName}` }];
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: owner.name,
+  jobTitle: owner.role,
+  worksFor: businessRef,
+  hasCredential: owner.certifications.map((c) => ({ '@type': 'EducationalOccupationalCredential', name: c })),
+};
+const rules = [
+  { t: 'מודדים לפני שממליצים', d: 'המלצה על הספק ניתנת אחרי מדידה של החדר, לא לפי מה שיש במלאי.' },
+  { t: 'מוצאים נזילה לפני שממלאים גז', d: 'מילוי בלי תיקון הוא כסף שנגמר עם הגז.' },
+  { t: 'מחיר סגור לפני העבודה', d: 'אם משהו משתנה באמצע, עוצרים ומדברים לפני שממשיכים.' },
+  { t: 'משאירים נקי', d: 'כיסוי ניקוז בניקוי, שואב אבק בקידוח, והקיר חוזר כמו שהיה.' },
+];
+---
+<BaseLayout
+  title={`אודות ${owner.name}, טכנאי מיזוג אוויר`}
+  description={`${owner.name}, ${owner.role}. ${stats.years} שנים ${site.regionIn}, ${stats.installs.toLocaleString('he-IL')} התקנות, הסמכות ועקרונות עבודה.`}
+  schema={[breadcrumbSchema(crumbs), person]}
+>
+  <PageHero title={`${owner.name}, מאחורי ${site.shortName}`} lead={owner.shortBio} crumbs={crumbs} />
+
+  <section class="section">
+    <div class="container story">
+      <div class="portrait">
+        <Image src={owner.image} alt={owner.imageAlt} widths={[400, 700]} sizes="(min-width: 960px) 420px, 100vw" loading="eager" />
+      </div>
+      <div class="prose">
+        <h2>איך זה התחיל</h2>
+        {owner.story.map((p) => <p>{p}</p>)}
+        <h3>הסמכות</h3>
+        <ul class="ticks">{owner.certifications.map((c) => <li>{c}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--ink">
+    <div class="container">
+      <div class="head"><h2>ארבעה כללים שלא משתנים</h2></div>
+      <ul class="rules">
+        {rules.map((r) => (<li><h3>{r.t}</h3><p>{r.d}</p></li>))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container plate-row">
+      <div>
+        <h2>הרכב, הכלים והאזור</h2>
+        <p class="lead">הרכב יוצא כל בוקר מ{contact.baseArea} עם מד לחצים דיגיטלי, משאבת ואקום, גלאי נזילות וחלקים נפוצים, כך שרוב התיקונים נגמרים בביקור אחד.</p>
+        <Image src={images.van} alt={images.vanAlt} widths={[480, 800]} sizes="(min-width: 960px) 560px, 100vw" loading="lazy" class="van" />
+      </div>
+      <Nameplate />
+    </div>
+  </section>
+
+  <CtaPanel title={`לדבר עם ${owner.firstName}`} text={`${contact.responsePromise}. ${contact.sameDayLabel}.`} />
+</BaseLayout>
+
+<style>
+  .story { display: grid; gap: var(--space-7); align-items: start; }
+  @media (min-width: 960px) { .story { grid-template-columns: 0.8fr 1.2fr; gap: var(--space-8); } .portrait { position: sticky; top: calc(var(--header-h) + 1rem); } }
+  .portrait :global(img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top; border-radius: var(--r-panel); }
+  .prose h2 { margin-top: 0; }
+  .rules { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); }
+  @media (min-width: 800px) { .rules { grid-template-columns: repeat(2, 1fr); gap: var(--space-6) var(--space-8); } }
+  .rules li { border-top: 3px solid var(--c-lime); padding-top: var(--space-4); }
+  .rules h3 { color: #fff; font-size: 1.3rem; }
+  .rules p { color: var(--c-on-dark-muted); margin: 0; }
+  .plate-row { display: grid; gap: var(--space-7); align-items: center; }
+  @media (min-width: 960px) { .plate-row { grid-template-columns: 1.1fr 0.9fr; gap: var(--space-8); } }
+  .plate-row :global(.van) { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--r-panel); }
+</style>

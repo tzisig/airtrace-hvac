@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { contact, site, owner, telLink, waLink } from '../config/site.config';
+---
+<BaseLayout title={`תודה, הפנייה התקבלה | ${site.shortName}`} description={`הפנייה התקבלה. ${owner.firstName} יחזור אליכם בהקדם.`} noindex>
+  <section class="thanks">
+    <div class="container narrow">
+      <h1>קיבלנו. {owner.firstName} יחזור אליכם.</h1>
+      <p class="lead">{contact.responsePromise}. אם המזגן מטפטף ליד חשמל או שהמפסק קופץ, כבו אותו מהמפסק עד שנדבר.</p>
+      <div class="btn-row">
+        <a class="btn btn--ink" href={telLink}><Icon name="phone" size={20} /> <span class="ltr">{contact.phone}</span></a>
+        <a class="btn btn--wa" href={waLink()}><Icon name="whatsapp" size={20} /> וואטסאפ</a>
+      </div>
+      <p class="next">בינתיים אפשר <a href="/troubleshooting/">לבדוק כמה דברים לבד</a> או <a href="/calculator/">לחשב כמה כ"ס צריך</a>.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .thanks { padding-block: var(--space-9); min-height: 60svh; }
+  .lead { margin-bottom: var(--space-6); }
+  .next { margin-top: var(--space-6); color: var(--c-slate); }
+</style>

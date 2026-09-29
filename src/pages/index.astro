@@ -1,0 +1,222 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import CapacityDial from '../components/CapacityDial.astro';
+import Nameplate from '../components/Nameplate.astro';
+import ServiceList from '../components/ServiceList.astro';
+import SymptomFinder from '../components/SymptomFinder.astro';
+import BeforeAfter from '../components/BeforeAfter.astro';
+import ReviewCard from '../components/ReviewCard.astro';
+import AreaMap from '../components/AreaMap.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaPanel from '../components/CtaPanel.astro';
+import ReminderButton from '../components/ReminderButton.astro';
+import { faqSchema } from '../lib/schema';
+import {
+  site, owner, contact, stats, services, areas, gallery, reviews, faq, plans, images, telLink, waLink,
+} from '../config/site.config';
+
+const homeFaq = faq.slice(0, 5);
+const featured = gallery.slice(0, 2);
+const plan = plans.find((p) => p.featured)!;
+---
+<BaseLayout
+  title={`טכנאי מיזוג אוויר ${site.regionIn} | ${site.shortName}`}
+  description={`התקנה, תיקון, ניקוי ומילוי גז למזגנים ב${areas.map((a) => a.name).join(', ')}. ${contact.sameDayLabel}. מחשבון כ"ס, מחירים שקופים ו-${stats.years} שנות ניסיון.`}
+  schema={[faqSchema(homeFaq)]}
+>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <h1>מיזוג אוויר בשרון, מההתקנה ועד תיקון באותו יום</h1>
+        <p class="lead">
+          {owner.name} מתקין, מתקן ומנקה מזגנים {site.regionIn} מאז {owner.since}. מודדים את החדר לפני שממליצים,
+          מוצאים את הנזילה לפני שממלאים גז, ונותנים מחיר סגור לפני שמתחילים.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn--ink" href={telLink}><Icon name="phone" size={20} /> <span class="ltr">{contact.phone}</span></a>
+          <a class="btn btn--wa" href={waLink()}><Icon name="whatsapp" size={20} /> וואטסאפ</a>
+        </div>
+        <ul class="proof">
+          <li><strong>{stats.rating}</strong> מתוך 5 ב-{stats.reviewCount} ביקורות</li>
+          <li><strong>{stats.sameDayShare}%</strong> מתיקוני הקיץ באותו יום</li>
+          <li><strong>{stats.installs.toLocaleString('he-IL')}+</strong> מזגנים הותקנו</li>
+        </ul>
+      </div>
+      <div class="hero-dial">
+        <h2 class="dial-title">כמה כ"ס צריך החדר שלכם?</h2>
+        <CapacityDial compact id="hero-dial" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--panel">
+    <div class="container who">
+      <div class="who-media">
+        <Image src={images.hero} alt={images.heroAlt} widths={[480, 800, 1200]} sizes="(min-width: 1000px) 560px, 100vw" loading="lazy" />
+      </div>
+      <div class="who-text">
+        <h2>מי מגיע אליכם</h2>
+        <p>{owner.shortBio}</p>
+        <Nameplate />
+        <p class="to-about"><a href="/about/">עוד על {owner.firstName} ועל הדרך שבה אנחנו עובדים</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="head-row">
+        <div class="head">
+          <h2>השירותים, והמחיר שממנו מתחילים</h2>
+          <p>כל מחיר כולל מע"מ. המחיר הסופי נקבע בהצעה סגורה לפני העבודה.</p>
+        </div>
+        <a class="btn btn--ghost" href="/prices/">המחירון המלא</a>
+      </div>
+      <ServiceList items={services} />
+    </div>
+  </section>
+
+  <section class="section section--panel">
+    <div class="container">
+      <div class="head">
+        <h2>המזגן לא עובד? נתחיל ממה שרואים</h2>
+        <p>בחרו מה קורה, בדקו את מה שבטוח לבדוק לבד, ושלחו לנו את התיאור בלחיצה.</p>
+      </div>
+      <SymptomFinder limit={6} />
+      <p class="more-link"><a href="/troubleshooting/">כל התקלות הנפוצות והסבר מלא</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="head-row">
+        <div class="head">
+          <h2>לפני ואחרי</h2>
+          <p>לחצו על "אחרי" כדי לראות את התוצאה.</p>
+        </div>
+        <a class="btn btn--ghost" href="/gallery/">כל העבודות</a>
+      </div>
+      <div class="ba-grid">
+        {featured.map((g) => (
+          <figure>
+            <BeforeAfter before={g.before} after={g.after} beforeAlt={g.beforeAlt} afterAlt={g.afterAlt} label={`השוואת לפני ואחרי: ${g.title}`} />
+            <figcaption><strong>{g.title}, {g.city}.</strong> {g.solution}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--ink">
+    <div class="container reviews">
+      <div class="rating">
+        <p class="big">{stats.rating}</p>
+        <p class="stars" aria-hidden="true">★★★★★</p>
+        <p>ממוצע של {stats.reviewCount} ביקורות לקוחות</p>
+        <a class="btn btn--ghost" href="/reviews/">לכל ההמלצות</a>
+      </div>
+      <div class="review-list">
+        {reviews.slice(0, 3).map((r) => <ReviewCard review={r} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container areas">
+      <div>
+        <div class="head">
+          <h2>אזורי השירות</h2>
+          <p>הרכב יוצא כל בוקר מ{contact.baseArea}. אלה זמני ההגעה הרגילים בשעות היום.</p>
+        </div>
+        <ul class="area-list">
+          {areas.map((a) => (
+            <li>
+              <a href={`/areas/${a.slug}/`}><strong>{a.name}</strong><span>{a.summary}</span></a>
+              <span class="eta"><Icon name="clock" size={16} /> {a.arrival}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <AreaMap />
+    </div>
+  </section>
+
+  <section class="section section--panel">
+    <div class="container plan">
+      <div>
+        <h2>חוזה שירות: שני ביקורים בשנה, ראשונים בתור בקיץ</h2>
+        <p class="lead">מסלול {plan.name}, {plan.units}: {plan.price.toLocaleString('he-IL')} ₪ לשנה. ניקוי וחיטוי באביב, בדיקה בסתיו ו-15% הנחה על תיקונים.</p>
+        <div class="btn-row">
+          <a class="btn" href="/services/maintenance-plan/">פרטי החוזה</a>
+          <ReminderButton ghost />
+        </div>
+      </div>
+      <ul class="ticks">{plan.features.map((f) => <li>{f}</li>)}</ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container faq-wrap">
+      <div class="head">
+        <h2>שאלות שחוזרות</h2>
+        <p><a href="/faq/">לכל השאלות והתשובות</a></p>
+      </div>
+      <FaqList items={homeFaq} />
+    </div>
+  </section>
+
+  <CtaPanel />
+</BaseLayout>
+
+<style>
+  .hero { padding-block: var(--space-6) var(--space-8); }
+  .hero-grid { display: grid; gap: var(--space-7); align-items: center; }
+  @media (min-width: 1000px) { .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: var(--space-8); } }
+  .hero h1 { font-size: clamp(3.6rem, 2.4rem + 5.6vw, 7.4rem); }
+  .hero .lead { max-width: 36rem; margin-bottom: var(--space-5); }
+  .proof { list-style: none; padding: 0; margin: var(--space-6) 0 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); color: var(--c-slate); font-size: 0.95rem; }
+  .proof strong { font: 700 1.9rem/1 var(--font-display); color: var(--c-ink); margin-inline-end: 0.2rem; }
+  .dial-title { font-size: clamp(2.2rem, 1.8rem + 1.4vw, 3rem); margin-bottom: var(--space-4); }
+
+  .who { display: grid; gap: var(--space-6); align-items: center; }
+  @media (min-width: 1000px) { .who { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+  .who-media :global(img) { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; border-radius: var(--r-panel); }
+  .who-text > p:first-of-type { font-size: 1.12rem; margin-bottom: var(--space-5); }
+  .to-about { margin: var(--space-5) 0 0; font-weight: 700; }
+
+  .more-link { margin: var(--space-5) 0 0; font-weight: 700; }
+
+  .ba-grid { display: grid; gap: var(--space-6); }
+  @media (min-width: 860px) { .ba-grid { grid-template-columns: 1fr 1fr; } }
+  figure { margin: 0; }
+  figcaption { margin-top: var(--space-3); color: var(--c-slate); }
+  figcaption strong { color: var(--c-ink); }
+
+  .reviews { display: grid; gap: var(--space-6); }
+  @media (min-width: 960px) { .reviews { grid-template-columns: 0.6fr 1.4fr; gap: var(--space-8); align-items: start; } }
+  .rating .big { font: 700 clamp(7rem, 5rem + 8vw, 11rem)/0.8 var(--font-display); color: var(--c-lime); margin: 0; }
+  .rating .stars { color: var(--c-lime); letter-spacing: 0.15em; margin: var(--space-3) 0 var(--space-2); }
+  .rating p { color: var(--c-on-dark-muted); }
+  .review-list :global(.review) { border-top-color: rgb(255 255 255 / 0.14); }
+  .review-list :global(.stars) { color: var(--c-lime); }
+  .review-list :global(.off) { color: rgb(255 255 255 / 0.2); }
+  .review-list :global(.meta) { color: var(--c-on-dark-muted); }
+
+  .areas { display: grid; gap: var(--space-6); align-items: center; }
+  @media (min-width: 960px) { .areas { grid-template-columns: 1.1fr 0.9fr; gap: var(--space-8); } }
+  .area-list { list-style: none; padding: 0; margin: 0; border-top: 2px solid var(--c-ink); }
+  .area-list li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: 0.9rem 0; border-bottom: 1px solid var(--c-line); }
+  .area-list a { display: grid; color: inherit; text-decoration: none; }
+  .area-list a strong { font: 700 2rem/1 var(--font-display); }
+  .area-list a:hover strong { color: var(--c-lime-deep); text-decoration: underline; }
+  .area-list a span { color: var(--c-slate); font-size: 0.95rem; }
+  .eta { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; font-weight: 600; font-size: 0.9rem; }
+
+  .plan { display: grid; gap: var(--space-6); align-items: center; }
+  @media (min-width: 960px) { .plan { grid-template-columns: 1.3fr 0.7fr; gap: var(--space-8); } }
+
+  .faq-wrap { display: grid; gap: var(--space-5); }
+  @media (min-width: 960px) { .faq-wrap { grid-template-columns: 0.7fr 1.3fr; gap: var(--space-8); } }
+</style>
