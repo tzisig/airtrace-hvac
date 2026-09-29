@@ -8,6 +8,7 @@ import karantinaLatin from '@fontsource/karantina/files/karantina-latin-700-norm
 import plex from '@fontsource/ibm-plex-sans-hebrew/files/ibm-plex-sans-hebrew-hebrew-400-normal.woff2?url';
 import plexBold from '@fontsource/ibm-plex-sans-hebrew/files/ibm-plex-sans-hebrew-hebrew-700-normal.woff2?url';
 
+import DemoBanner from '../components/DemoBanner.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MobileBar from '../components/MobileBar.astro';
@@ -119,6 +120,7 @@ const allSchema = [businessSchema, ...schema];
   </head>
   <body>
     <a class="skip-link" href="#main">דלגו לתוכן הראשי</a>
+    <DemoBanner />
     <Header />
     <main id="main">
       <slot />

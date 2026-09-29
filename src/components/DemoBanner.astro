@@ -1,0 +1,22 @@
+---
+// Shown on every page while site.isDemo is true, so nobody mistakes the demo for a real business.
+import { site } from '../config/site.config';
+---
+{site.isDemo && (
+  <aside class="demo-banner" aria-label="הודעה על אתר הדגמה">
+    <p><strong>אתר הדגמה</strong> {site.demoBanner}</p>
+  </aside>
+)}
+
+<style>
+  .demo-banner {
+    background: repeating-linear-gradient(-45deg, #F4D35E 0 14px, #EEC843 14px 28px);
+    color: var(--c-ink); text-align: center; padding: 0.45rem var(--gutter);
+    font-size: 0.9rem; line-height: 1.4; border-bottom: 1px solid rgb(27 35 38 / 0.2);
+  }
+  .demo-banner p { margin: 0; }
+  .demo-banner strong {
+    display: inline-block; margin-inline-end: 0.4rem; padding: 0.05rem 0.55rem;
+    background: var(--c-ink); color: #F4D35E; border-radius: var(--r-control); font-size: 0.82rem;
+  }
+</style>

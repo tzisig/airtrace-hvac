@@ -71,6 +71,8 @@ export const site = {
    */
   isDemo: true,
   demoNote: 'אתר הדגמה לתיק עבודות. שם העסק, הפרטים, המחירים והביקורות בדויים.',
+  /** Text of the striped strip at the top of every page (demo mode only). */
+  demoBanner: 'לתיק עבודות. העסק, הטלפון, המחירים והביקורות בדויים.',
   /** Last content review date, shown on service and price pages (YYYY-MM-DD). */
   contentUpdated: '2026-09-28',
 };
